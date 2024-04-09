@@ -1,0 +1,10 @@
+[package]
+name = "OS"
+version = "0.1.0"
+authors = ["François Costa"]
+edition = "2018"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
