@@ -1,1 +1,4 @@
 target/*
+os.elf
+Cargo.lock
+hdd.dsk

@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "OS"
+name = "sos"
 version = "0.1.0"

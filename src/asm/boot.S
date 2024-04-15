@@ -9,6 +9,25 @@
 # Define a .data section.
 .section .data
 
+
+# Read only data section, write all variables we need to initialize memory mapping
+.section .rodata
+
+.global BSS_START
+BSS_START: .dword _bss_start
+
+.global BSS_END
+BSS_END: .dword _bss_end
+
+.global HEAP_START
+HEAP_START: .dword _heap_start
+
+.global HEAP_SIZE
+HEAP_SIZE: .dword _heap_size
+
+.global HEAP_END
+HEAP_END: .dword _heap_end
+
 # Define a .text.init section.
 .section .text.init
 
