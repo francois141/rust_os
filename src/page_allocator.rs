@@ -1,8 +1,6 @@
 use core::ptr::null_mut;
 use core::mem::size_of;
 
-use core::fmt::Write;
-
 extern "C" {
 	static HEAP_START: usize;
 	static HEAP_SIZE: usize;
@@ -12,7 +10,7 @@ static EMPTY_PAGE: u8 = 0x0;
 static TAKEN_FLAG: u8 = 0x1;
 static LAST_FLAG: u8 = 0x2;
 
-static PAGE_SIZE: usize = 4096;
+pub static PAGE_SIZE: usize = 4096;
 
 pub struct Page {
     flags: u8,
@@ -45,6 +43,7 @@ impl Page {
 }
 
 static mut ALLOC_START: usize = 0;
+pub static mut ALLOCATED_PAGE_HEAP_ALLOCATOR: usize = 0;
 
 pub const fn page_align_round_up(val: usize) -> usize {
 	let o = 4096 - 1;
@@ -54,18 +53,16 @@ pub const fn page_align_round_up(val: usize) -> usize {
 
 pub fn init_allocator() {
     unsafe {
-        let number_pages:usize = HEAP_SIZE / PAGE_SIZE;
+        ALLOCATED_PAGE_HEAP_ALLOCATOR = HEAP_SIZE / PAGE_SIZE;
         let pointer = HEAP_START as *mut Page;
         
         // Reserve some place for the page allocator
-        ALLOC_START = page_align_round_up(HEAP_START + number_pages * size_of::<Page>());
+        ALLOC_START = page_align_round_up(HEAP_START + ALLOCATED_PAGE_HEAP_ALLOCATOR * size_of::<Page>());
 
         // Clear pages for security reason
-        for i in 0 .. number_pages {
+        for i in 0 .. ALLOCATED_PAGE_HEAP_ALLOCATOR {
             (*pointer.add(i)).clear_all_flags();
         }
-        
-        // TODO: Use another variable than heap_size and set correct "free size"
     }
 }
 

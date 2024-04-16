@@ -1,7 +1,9 @@
 #![no_std]
-#![feature(panic_info_message)]
+#![feature(panic_info_message, allocator_api, alloc_error_handler)]
+
 
 use core::fmt::Write;
+
 
 #[macro_export]
 macro_rules! print {
@@ -54,23 +56,28 @@ extern "C" {
 	static HEAP_END: usize;
 }
 
+#[no_mangle]
+extern "C"
+fn init() {
+	// Setup driver
+	uart::Uart::start_driver(0x1000_0000);
+
+	// Init page allocator
+	page_allocator::init_allocator();
+	page_allocator::init_sanity_check();
+
+	// Init memory allocator
+	kmalloc::init();
+	kmalloc::init_sanity_check();
+
+	// Init paging
+	paging::init();
+	paging::init_sanity_check();
+}
 
 #[no_mangle]
 extern "C"
 fn kmain() {
-	// Main should initialize all sub-systems and get
-	// ready to start scheduling. The last thing this
-	// should do is start the timer.
-
-	// Setup driver
-	uart::Uart::start_driver(0x1000_0000);
-
-	// Init alloc
-	page_allocator::init_allocator();
-
-	// Quick test 
-	page_allocator::init_sanity_check();
-
 	// A few security assertions
 	unsafe {
 		// Safety assertion
@@ -86,7 +93,7 @@ fn kmain() {
 	println!("Result first  allocation : {:p}", page_allocator::alloc(1));
 	println!("Result second allocation : {:p}", page_allocator::alloc(4));
 	println!("Result third allocation : {:p}", page_allocator::alloc(4));
-	
+
 	// End of the kernel
 	loop {
 		
@@ -95,5 +102,5 @@ fn kmain() {
 
 pub mod page_allocator;
 pub mod uart;
-
-
+pub mod paging;
+pub mod kmalloc;

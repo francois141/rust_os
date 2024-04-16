@@ -10,6 +10,7 @@ static LINE_STATUS_REGISTER_OFFSET: usize = 5;
 
 static DATA_READY_MASK: u8 = 0x1;
 
+pub static UART_BASE_ADDRESS: usize = 0x1000_0000;
 
 
 pub struct Uart {
