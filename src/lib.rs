@@ -1,9 +1,9 @@
 #![no_std]
 #![feature(panic_info_message, allocator_api, alloc_error_handler)]
 
-
+use core::ptr::addr_of;
 use core::fmt::Write;
-
+use core::arch::asm;
 
 #[macro_export]
 macro_rules! print {
@@ -58,7 +58,7 @@ extern "C" {
 
 #[no_mangle]
 extern "C"
-fn init() {
+fn init() -> usize {
 	// Setup driver
 	uart::Uart::start_driver(0x1000_0000);
 
@@ -73,6 +73,12 @@ fn init() {
 	// Init paging
 	paging::init();
 	paging::init_sanity_check();
+
+	println!("Done with init");
+
+	return unsafe {
+		addr_of!(paging::ROOT) as usize
+	}
 }
 
 #[no_mangle]
@@ -94,6 +100,19 @@ fn kmain() {
 	println!("Result second allocation : {:p}", page_allocator::alloc(4));
 	println!("Result third allocation : {:p}", page_allocator::alloc(4));
 
+	unsafe {
+		asm!("ecall");
+	}
+
+	println!("Second time to test trap");
+
+	unsafe {
+		asm!("ecall");
+	}
+
+	println!("Interrupt works!");
+
+
 	// End of the kernel
 	loop {
 		
@@ -104,3 +123,5 @@ pub mod page_allocator;
 pub mod uart;
 pub mod paging;
 pub mod kmalloc;
+pub mod trap;
+pub mod reg; 

@@ -1,5 +1,6 @@
 use crate::page_allocator;
 use crate::uart;
+use core::fmt::Write;
 
 #[repr(i64)]
 #[derive(Copy, Clone)]
@@ -182,7 +183,7 @@ extern "C" {
     static HEAP_START: usize;
 }
 
-static mut ROOT: PageTable = PageTable{
+pub static mut ROOT: PageTable = PageTable{
     entries: [PageTableEntry{entry:0,}; 512],
 };
 
