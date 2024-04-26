@@ -8,7 +8,7 @@ use core::arch::asm;
 #[macro_export]
 macro_rules! print {
 	($($args:tt)+) => ({
-		let _ = write!(crate::uart::Uart::create(0x1000_0000), $($args)+);
+		let _ = write!(crate::uart::Uart::get(), $($args)+);
 	});
 }
 
@@ -74,6 +74,10 @@ fn init() -> usize {
 	paging::init();
 	paging::init_sanity_check();
 
+	// Init plic
+	plic::init_plic();
+	plic::init_sanity_check();
+
 	println!("Done with init");
 
 	return unsafe {
@@ -112,8 +116,6 @@ fn kmain() {
 
 	println!("Interrupt works!");
 
-
-	// End of the kernel
 	loop {
 		
 	}
@@ -125,3 +127,4 @@ pub mod paging;
 pub mod kmalloc;
 pub mod trap;
 pub mod reg; 
+pub mod plic;

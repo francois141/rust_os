@@ -27,9 +27,9 @@ impl Write for Uart {
 }
 
 impl Uart {
-    pub fn create(base_address: usize) -> Self {
+    pub fn get() -> Self {
         Uart {
-            base_address
+            base_address: 0x1000_0000
         }
     }
 
@@ -45,9 +45,8 @@ impl Uart {
 
             // Enable receiver buffer interrups
             pointer.add(INTERRUPT_ENABLE_REGISTER_OFFSET).write_volatile(0x1);
-
-            // TODO: DO I need more?
         }
+
 
         0
     }
@@ -57,10 +56,10 @@ impl Uart {
 
         unsafe {
             if pointer.add(LINE_STATUS_REGISTER_OFFSET).read_volatile() & DATA_READY_MASK == 0 {
-                Some(pointer.add(RECEIVER_OFFSET).read_volatile())
+                None
             } 
             else {
-                None
+                Some(pointer.add(RECEIVER_OFFSET).read_volatile())
             }
         }
     }
