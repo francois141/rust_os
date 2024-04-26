@@ -23,11 +23,23 @@ extern "C" fn m_trap() -> usize
 				// Go to next instruction
 				return_pc += 4
 			},
+			// Page faults
+			12 => {
+				panic!("Page fault ==> os exit");
+			},
+			13 => {
+				panic!("Page fault ==> os exit");
+			},
+			15 => {
+				panic!("Page fault ==> os exit");
+			},
             _ => {
-                println!("Unhandled interrupt!");
+                //println!("Unhandled interrupt! {}", cause_num);
             }
 		}
 	};
+
+	println!("Unhandled interrupt! {} {}",cause >> 63 & 1, cause_num);
 
 	return_pc
 }

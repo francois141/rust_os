@@ -81,9 +81,34 @@ fn init() -> usize {
 	}
 }
 
+
+/// Build satp value from mode, asid and page table base addr
+pub fn build_satp(mode: usize, asid: usize, addr: usize) -> usize {
+    if addr % 4096 != 0 {
+        panic!("satp not aligned!");
+    }
+    (mode as usize) << 60 | (asid & 0xffff) << 44 | (addr >> 12) & 0xff_ffff_ffff
+}
+
 #[no_mangle]
 extern "C"
 fn kmain() {
+
+	// Try install paging here
+	unsafe {
+		let mut root_ppn = paging::ROOT as *const paging::PageTable as usize;
+		let satp_val = build_satp(8, 0, root_ppn);
+		
+		asm!("csrw satp, {0}", in(reg) satp_val);
+		asm!("sfence.vma");
+		asm!("fence");
+	
+		println!("Paging works");
+
+		let ptr = 0x4435 as *mut u8;
+		(*ptr) = 0x1;
+	}
+
 	// A few security assertions
 	unsafe {
 		// Safety assertion

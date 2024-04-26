@@ -1,6 +1,7 @@
 use crate::page_allocator;
 use crate::uart;
 use core::fmt::Write;
+use core::ptr::null_mut;
 
 #[repr(i64)]
 #[derive(Copy, Clone)]
@@ -89,7 +90,7 @@ pub fn map(virtual_address: usize, physical_address: usize, bits: i64) {
     let physical_offsets = [(physical_address >> 30) & 0x3ff_ffff, (physical_address >> 21) & 0x1ff, (physical_address >> 12) & 0x1ff];
 
     unsafe {
-        let mut current = &mut ROOT.entries[virtual_offsets[0]];
+        let mut current = &mut (*ROOT).entries[virtual_offsets[0]];
 
         for i in 1..=2 {
             if current.is_invalid() {
@@ -122,7 +123,7 @@ pub fn virtual_to_physical(virtual_address: usize) -> Option<usize> {
     let virtual_offsets = get_virtual_offsets(virtual_address);
 
     unsafe {
-        let mut current = &ROOT.entries[virtual_offsets[0]];
+        let mut current = &(*ROOT).entries[virtual_offsets[0]];
 
         for i in 0..=2 {
             if current.is_invalid() {
@@ -183,9 +184,7 @@ extern "C" {
     static HEAP_START: usize;
 }
 
-pub static mut ROOT: PageTable = PageTable{
-    entries: [PageTableEntry{entry:0,}; 512],
-};
+pub static mut ROOT: *mut PageTable = null_mut();
 
 pub fn init() {
     unsafe {
@@ -220,8 +219,6 @@ pub fn init_sanity_check() {
         assert!(RODATA_START == virtual_to_physical(RODATA_START).unwrap(), "Identity mapping is broken is RODATA section");
         assert!(BSS_START == virtual_to_physical(BSS_START).unwrap(), "Identity mapping is broken is BSS section");
         assert!(HEAP_START == virtual_to_physical(HEAP_START).unwrap(), "Identity mapping is broken for heap allocator");
-        assert!(uart::UART_BASE_ADDRESS == virtual_to_physical(uart::UART_BASE_ADDRESS).unwrap(), "Identity mapping is broken for uart driver");
+        assert!(uart::UART_BASE_ADDRESS == virtual_to_physical(uart::UART_BASE_ADDRESS).unwrap(), "Identity mapping is broken for uart driver");*/
     }
 }
-
-

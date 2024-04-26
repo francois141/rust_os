@@ -1,0 +1,15 @@
+/*pub fn unmap(page_table: &mut PageTable) {
+    for i in 0..PageTable::len() {
+        // TODO: ref instead of mut?
+        let entry = &page_table.entries[i];
+        if entry.is_valid() {
+            if entry.is_branch() {
+                // TODO: Convert page table entry in page table
+                // unmap(&mut entry);
+            }
+
+            let address = get_address_from_entry(entry) as *mut u8;
+            page_allocator::dealloc(address);
+        }
+    }
+}*/
