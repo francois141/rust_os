@@ -20,6 +20,7 @@ extern "C" fn m_trap() -> usize
 
 	if !is_async {
 		match cause_num {
+
 			11 => {
 				// Environment (system) call from Machine mode
 				println!("E-call from Machine mode! from core : {} -> 0x{:08x}", hart, return_pc);
@@ -27,7 +28,7 @@ extern "C" fn m_trap() -> usize
 				return_pc += 4
 			},
             _ => {
-                println!("Unhandled interrupt!");
+                println!("Unhandled interrupt! {}", cause_num);
             }
 		}
 	}
@@ -56,6 +57,59 @@ extern "C" fn m_trap() -> usize
 
 	return_pc
 }
+
+extern "C" fn s_trap() -> usize
+{
+	println!("FROM SUPERVISOR");
+	let mut return_pc = reg::mepc_read();
+	let tval = reg::mtval_read();
+	let cause = reg::mcause_read();
+	let hart = reg::mhartid_read();
+	let status = reg::mstatus_read();
+
+	let is_async: bool = cause >> 63 & 1 == 1;
+
+	let cause_num = cause & 0xfff;
+
+	if !is_async {
+		match cause_num {
+			11 => {
+				// Environment (system) call from Machine mode
+				println!("E-call from Machine mode! from core : {} -> 0x{:08x}", hart, return_pc);
+				// Go to next instruction
+				return_pc += 4
+			},
+            _ => {
+                println!("Unhandled interrupt! {}", cause_num);
+            }
+		}
+	}
+
+	if is_async {
+		match cause_num {
+			11 => {
+				if let Some(interrupt_code) = plic::next_interrupt() {
+					match interrupt_code {
+						10 => {
+							print_uart_value();
+						} 
+						_ => {
+							println!("Ignored plic interrupt");
+						}
+					}
+					// Clear interrupt 
+					plic::clear_interrupt(interrupt_code);
+				}
+			} 
+			_ => {
+				println!("Unhandled async interrupt");
+			}
+		}
+	}
+
+	return_pc
+}
+
 
 
 fn print_uart_value() {

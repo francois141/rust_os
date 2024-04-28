@@ -1,5 +1,6 @@
 use core::ptr::null_mut;
 use core::mem::size_of;
+use core::fmt::Write;
 
 extern "C" {
 	static HEAP_START: usize;
@@ -53,6 +54,7 @@ pub const fn page_align_round_up(val: usize) -> usize {
 
 pub fn init_allocator() {
     unsafe {
+        assert!(HEAP_SIZE > 0);
         ALLOCATED_PAGE_HEAP_ALLOCATOR = HEAP_SIZE / PAGE_SIZE;
         let pointer = HEAP_START as *mut Page;
         
@@ -70,6 +72,11 @@ pub fn alloc(pages: usize) -> *mut u8 {
 
     // Safety assertion
     assert!(pages > 0);
+
+    unsafe {
+        assert!(ALLOC_START > 0);
+    }
+
 
     unsafe {
         let pointer = HEAP_START as *mut Page;
@@ -97,11 +104,18 @@ pub fn alloc(pages: usize) -> *mut u8 {
                     (*pointer.add(i + pages - 1)).set_flag(LAST_FLAG);
 
                     let raw_pointer = (ALLOC_START + PAGE_SIZE * i) as *mut u64;
+                    println!("{:p}",raw_pointer as *mut u64);
 
-                    // Clear pages for security reasons
-                    for offset in 0..PAGE_SIZE * pages/8 {
-                        (*raw_pointer.add(offset)) = 0;
+                    if raw_pointer as usize== 0x0 {
+                        println!("OMGFDSJHK");
                     }
+ 
+                    // Clear pages for security reasons
+                    /*for offset in 0..PAGE_SIZE * pages/8 {
+                        (*raw_pointer.add(offset)) = 0;
+                    }*/
+
+                   
 
                     return raw_pointer as *mut u8
                 }

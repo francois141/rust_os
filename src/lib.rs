@@ -58,31 +58,10 @@ extern "C" {
 
 #[no_mangle]
 extern "C"
-fn init() -> usize {
-	// Setup driver
-	uart::Uart::start_driver(0x1000_0000);
-
-	// Init page allocator
-	page_allocator::init_allocator();
-	page_allocator::init_sanity_check();
-
-	// Init memory allocator
-	kmalloc::init();
-	kmalloc::init_sanity_check();
-
-	// Init paging
-	paging::init();
-	paging::init_sanity_check();
-
-	// Init plic
-	plic::init_plic();
-	plic::init_sanity_check();
+fn init() {
 
 	println!("Done with init");
-
-	return unsafe {
-		addr_of!(paging::ROOT) as usize
-	}
+	kmain()
 }
 
 #[no_mangle]
@@ -100,18 +79,16 @@ fn kmain() {
 	// Print on screen
 	println!("Welcome on my rust risc-v operating system !!!");
 
-	println!("Result first  allocation : {:p}", page_allocator::alloc(1));
-	println!("Result second allocation : {:p}", page_allocator::alloc(4));
-	println!("Result third allocation : {:p}", page_allocator::alloc(4));
+	page_allocator::alloc(1);
 
 	unsafe {
-		asm!("ecall");
+		//asm!("ecall");
 	}
 
 	println!("Second time to test trap");
 
 	unsafe {
-		asm!("ecall");
+		//asm!("ecall");
 	}
 
 	println!("Interrupt works!");
