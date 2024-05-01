@@ -56,9 +56,8 @@ extern "C" {
 	static HEAP_END: usize;
 }
 
-#[no_mangle]
-extern "C"
-fn init() -> usize {
+
+fn init() {
 	// Setup driver
 	uart::Uart::start_driver(0x1000_0000);
 
@@ -78,24 +77,19 @@ fn init() -> usize {
 	plic::init_plic();
 	plic::init_sanity_check();
 
-	println!("Done with init");
-
-	return unsafe {
-		addr_of!(paging::ROOT) as usize
+	unsafe {
+		// Safety assertion
+		assert!(HEAP_START + HEAP_SIZE == HEAP_END);
 	}
+
+	println!("Done with init");
 }
 
 #[no_mangle]
 extern "C"
 fn kmain() {
-	// A few security assertions
-	unsafe {
-		// Safety assertion
-		assert!(HEAP_START + HEAP_SIZE == HEAP_END);
-
-		println!("BSS Section : 0x{:x} -> 0x{:x}", BSS_START, BSS_END);
-		println!("HEAP Section : 0x{:x} -> 0x{:x}", HEAP_START, HEAP_END);
-	}
+	// Init os
+	init();
 
 	// Print on screen
 	println!("Welcome on my rust risc-v operating system !!!");
