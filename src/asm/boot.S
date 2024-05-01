@@ -81,6 +81,10 @@ _start:
 	sd		zero, (a0)
 	addi	a0, a0, 8
 	bltu	a0, a1, 1b
+	li t0, 0xFFFFFFFF
+	csrw pmpaddr0,t0
+	li t0, 0xFF
+	csrw pmpcfg0,t0
 2:	
 # Control registers, set the stack, mstatus, mepc,
 	# and mtvec to return to the main function.
@@ -110,7 +114,7 @@ _start:
 	# 0b11 << 11: Machine's previous protection mode is 3 (MPP=3).
 	# 1 << 7    : Machine's previous interrupt-enable bit is 1 (MPIE=1).
 	# 1 << 3    : Machine's interrupt-enable bit is 1 (MIE=1).
-	li		t0, (0b11 << 11) | (1 << 7) | (1 << 3)
+	li t0, (0b01 << 11) | (1 << 7) | (1 << 3)
 	csrw	mstatus, t0
 	# Machine's exception program counter (MEPC) is set to `kmain`.
 	la 		t1, kmain

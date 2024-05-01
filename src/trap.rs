@@ -20,6 +20,12 @@ extern "C" fn m_trap() -> usize
 
 	if !is_async {
 		match cause_num {
+			9 => {
+				// Environment (system) call from Supervisor mode
+				println!("E-call from Supervisor mode! from core : {} -> 0x{:08x}", hart, return_pc);
+				// Go to next instruction
+				return_pc += 4
+			},
 			11 => {
 				// Environment (system) call from Machine mode
 				println!("E-call from Machine mode! from core : {} -> 0x{:08x}", hart, return_pc);
