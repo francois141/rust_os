@@ -1,5 +1,6 @@
 
 use core::fmt::Write;
+use crate::paging;
 use crate::reg;
 use crate::plic;
 
@@ -22,18 +23,34 @@ extern "C" fn m_trap() -> usize
 		match cause_num {
 			9 => {
 				// Environment (system) call from Supervisor mode
-				println!("E-call from Supervisor mode! from core : {} -> 0x{:08x}", hart, return_pc);
+				println!("E-call from Supervisor mode from core : {} -> 0x{:08x}", hart, return_pc);
 				// Go to next instruction
 				return_pc += 4
 			},
 			11 => {
 				// Environment (system) call from Machine mode
-				println!("E-call from Machine mode! from core : {} -> 0x{:08x}", hart, return_pc);
+				println!("E-call from Machine mode from core : {} -> 0x{:08x}", hart, return_pc);
 				// Go to next instruction
 				return_pc += 4
 			},
+			// Page faults
+			12 => {
+				// Instruction page fault
+				println!("Instruction page fault from core : {} -> 0x{:08x}", hart, tval);
+				return_pc += 4;
+			},
+			13 => {
+				// Load page fault
+				println!("Load page fault from core : {} -> 0x{:08x}", hart, tval);
+				return_pc += 4;
+			},
+			15 => {
+				// Store page fault
+				println!("Store page fault from core : {} -> 0x{:08x}", hart, tval);
+				return_pc += 4;
+			},
             _ => {
-                println!("Unhandled interrupt!");
+                println!("Unhandled interrupt! {}", cause_num);
             }
 		}
 	}

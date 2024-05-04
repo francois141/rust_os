@@ -5,6 +5,7 @@ use core::ptr::addr_of;
 use core::fmt::Write;
 use core::arch::asm;
 
+
 #[macro_export]
 macro_rules! print {
 	($($args:tt)+) => ({
@@ -94,24 +95,12 @@ fn kmain() {
 	// Print on screen
 	println!("Welcome on my rust risc-v operating system !!!");
 
-	println!("Result first  allocation : {:p}", page_allocator::alloc(1));
-	println!("Result second allocation : {:p}", page_allocator::alloc(4));
-	println!("Result third allocation : {:p}", page_allocator::alloc(4));
-
+	// Install page table
 	unsafe {
-		asm!("ecall");
-	}
-
-	println!("Second time to test trap");
-
-	unsafe {
-		asm!("ecall");
-	}
-
-	println!("Interrupt works!");
-
-	loop {
-		
+		let root_address = (paging::ROOT) as usize;
+		let satp_val = paging::craft_satp(8, 0, root_address);
+		asm!("csrw satp, {}", in(reg)satp_val);
+        asm!("sfence.vma");
 	}
 }
 

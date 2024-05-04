@@ -1,6 +1,8 @@
 use crate::page_allocator;
 use crate::uart;
+use core::arch::asm;
 use core::fmt::Write;
+use core::ptr::null_mut;
 
 #[repr(i64)]
 #[derive(Copy, Clone)]
@@ -89,7 +91,7 @@ pub fn map(virtual_address: usize, physical_address: usize, bits: i64) {
     let physical_offsets = [(physical_address >> 30) & 0x3ff_ffff, (physical_address >> 21) & 0x1ff, (physical_address >> 12) & 0x1ff];
 
     unsafe {
-        let mut current = &mut ROOT.entries[virtual_offsets[0]];
+        let mut current = &mut (*ROOT).entries[virtual_offsets[0]];
 
         for i in 1..=2 {
             if current.is_invalid() {
@@ -122,7 +124,7 @@ pub fn virtual_to_physical(virtual_address: usize) -> Option<usize> {
     let virtual_offsets = get_virtual_offsets(virtual_address);
 
     unsafe {
-        let mut current = &ROOT.entries[virtual_offsets[0]];
+        let mut current = &(*ROOT).entries[virtual_offsets[0]];
 
         for i in 0..=2 {
             if current.is_invalid() {
@@ -150,23 +152,23 @@ pub const fn page_align_round_down(val: usize) -> usize {
 }
 
 
-pub fn identity_map_range(start: usize, end: usize, bits: i64) {
+pub fn identity_map_range(start: usize, end: usize) {
     let current_address_start = page_align_round_down(start);
     let current_address_end = page_allocator::page_align_round_up(end);
 
     let number_pages = (current_address_end - current_address_start) / page_allocator::PAGE_SIZE;
 
     for i in 0..number_pages {
-        map(current_address_start + 4096 * i, current_address_start + 4096*i, bits);
+        map(current_address_start + 4096 * i, current_address_start + 4096*i, EntryBits::ReadWriteExecute.val());
     }
 }
 
-pub fn identity_map_range_read_write(virtual_address: usize, physical_address: usize) {
-    identity_map_range(virtual_address, physical_address, EntryBits::ReadWrite.val())
-}
-
-pub fn identity_map_range_read_execute(virtual_address: usize, physical_address: usize) {
-    identity_map_range(virtual_address, physical_address, EntryBits::ReadExecute.val());
+/// Build satp value from mode, asid and page table base addr
+pub fn craft_satp(mode: usize, asid: usize, addr: usize) -> usize {
+    if addr % 4096 != 0 {
+        panic!("satp not aligned!");
+    }
+    (mode as usize) << 60 | (asid & 0xffff) << 44 | (addr >> 12) & 0xff_ffff_ffff
 }
 
 extern "C" {
@@ -183,32 +185,31 @@ extern "C" {
     static HEAP_START: usize;
 }
 
-pub static mut ROOT: PageTable = PageTable{
-    entries: [PageTableEntry{entry:0,}; 512],
-};
+pub static mut ROOT: *mut PageTable = null_mut();
 
 pub fn init() {
     unsafe {
+        ROOT = page_allocator::alloc(1) as *mut PageTable;
         // Map kernel code
-        identity_map_range_read_write(TEXT_START,TEXT_END);    
+        identity_map_range(TEXT_START,TEXT_END);    
 
         // Map kernel stack
-        identity_map_range_read_write(KERNEL_STACK_START,KERNEL_STACK_END);    
+        identity_map_range(KERNEL_STACK_START,KERNEL_STACK_END);    
 
         // Data section
-        identity_map_range_read_write(DATA_START,DATA_END);   
+        identity_map_range(DATA_START,DATA_END);   
 
         // Rodata section
-        identity_map_range_read_execute(RODATA_START, RODATA_END);
+        identity_map_range(RODATA_START, RODATA_END);
 
         // Bss section
-        identity_map_range_read_write(BSS_START,BSS_END);    
+        identity_map_range(BSS_START,BSS_END);    
        
         // Map memory used for page allocation
-        identity_map_range_read_write(HEAP_START,HEAP_START + page_allocator::ALLOCATED_PAGE_HEAP_ALLOCATOR);   
+        identity_map_range(HEAP_START,HEAP_START + page_allocator::ALLOCATED_PAGE_HEAP_ALLOCATOR);   
         
         // Map uart driver
-        identity_map_range_read_write(uart::UART_BASE_ADDRESS, uart::UART_BASE_ADDRESS + page_allocator::PAGE_SIZE);
+        identity_map_range(uart::UART_BASE_ADDRESS, uart::UART_BASE_ADDRESS + page_allocator::PAGE_SIZE);
     }
 }
 
