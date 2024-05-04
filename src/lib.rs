@@ -61,29 +61,33 @@ extern "C" {
 fn init() {
 	// Setup driver
 	uart::Uart::start_driver(0x1000_0000);
+	println!("Uart driver : \x1b[32m[DONE]\x1b[0m");
+
 
 	// Init page allocator
 	page_allocator::init_allocator();
 	page_allocator::init_sanity_check();
+	println!("Page allocator : \x1b[32m[DONE]\x1b[0m");
 
 	// Init memory allocator
 	kmalloc::init();
 	kmalloc::init_sanity_check();
-
+	println!("Memory allocator : \x1b[32m[DONE]\x1b[0m");
+		
 	// Init paging
 	paging::init();
 	paging::init_sanity_check();
+	println!("Paging : \x1b[32m[DONE]\x1b[0m");
 
 	// Init plic
 	plic::init_plic();
 	plic::init_sanity_check();
+	println!("Plic : \x1b[32m[DONE]\x1b[0m");
 
 	unsafe {
 		// Safety assertion
 		assert!(HEAP_START + HEAP_SIZE == HEAP_END);
 	}
-
-	println!("Done with init");
 }
 
 #[no_mangle]
@@ -93,7 +97,7 @@ fn kmain() {
 	init();
 
 	// Print on screen
-	println!("Welcome on my rust risc-v operating system !!!");
+	println!("\x1b[1m\x1b[32mWelcome on my rust risc-v operating system !!!\x1b[0m");
 
 	// Install page table
 	unsafe {

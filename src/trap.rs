@@ -61,7 +61,9 @@ extern "C" fn m_trap() -> usize
 				if let Some(interrupt_code) = plic::next_interrupt() {
 					match interrupt_code {
 						10 => {
+							print!("\x1b[1m\x1b[3m\x1b[36m");
 							print_uart_value();
+							print!("\x1b[0m");
 						} 
 						_ => {
 							println!("Ignored plic interrupt");
