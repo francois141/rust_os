@@ -98,6 +98,9 @@ _start:
 	la		t2, asm_trap_vector
 	csrw	mtvec, t2
 
+	# Set return address
+	la		ra, _end
+
 	# mret allows us to jump to supervisor mode
 	mret
 _end:
