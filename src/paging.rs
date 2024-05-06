@@ -111,7 +111,7 @@ pub fn map(virtual_address: usize, physical_address: usize, bits: i64) {
         // Build entry
         entry |= (physical_offsets[0] << 28) as i64;
         entry |= (physical_offsets[1] << 19) as i64;
-        entry |= (physical_offsets[0] << 10) as i64;
+        entry |= (physical_offsets[2] << 10) as i64;
         entry |= bits | EntryBits::Valid.val();
     
         // Set the entry

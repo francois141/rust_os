@@ -7,7 +7,7 @@ const PLIC_CLAIM: usize = 0x0c20_0004;
 
 const UART_DEVICE:u32 = 10;
 
-pub fn init_plic() {
+pub fn init() {
     set_threshold(0);
 	enable_device(UART_DEVICE);
 	set_priority(UART_DEVICE, 1);

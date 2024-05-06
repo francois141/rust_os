@@ -63,7 +63,6 @@ fn init() {
 	uart::Uart::start_driver(0x1000_0000);
 	println!("Uart driver : \x1b[32m[DONE]\x1b[0m");
 
-
 	// Init page allocator
 	page_allocator::init_allocator();
 	page_allocator::init_sanity_check();
@@ -73,21 +72,25 @@ fn init() {
 	kmalloc::init();
 	kmalloc::init_sanity_check();
 	println!("Memory allocator : \x1b[32m[DONE]\x1b[0m");
-		
+
+	// Init plic
+	plic::init();
+	plic::init_sanity_check();
+	println!("Plic : \x1b[32m[DONE]\x1b[0m");
+	
 	// Init paging
 	paging::init();
 	paging::init_sanity_check();
-	println!("Paging : \x1b[32m[DONE]\x1b[0m");
 
-	// Init plic
-	plic::init_plic();
-	plic::init_sanity_check();
-	println!("Plic : \x1b[32m[DONE]\x1b[0m");
-
+	// Install page table
 	unsafe {
-		// Safety assertion
-		assert!(HEAP_START + HEAP_SIZE == HEAP_END);
+		let root_address = (paging::ROOT) as usize;
+		let satp_val = paging::craft_satp(8, 0, root_address);
+		asm!("csrw satp, {}", in(reg)satp_val);
+		asm!("sfence.vma");	
 	}
+
+	println!("Paging : \x1b[32m[DONE]\x1b[0m");
 }
 
 #[no_mangle]
@@ -98,14 +101,6 @@ fn kmain() {
 
 	// Print on screen
 	println!("\x1b[1m\x1b[32mWelcome on my rust risc-v operating system !!!\x1b[0m");
-
-	// Install page table
-	unsafe {
-		let root_address = (paging::ROOT) as usize;
-		let satp_val = paging::craft_satp(8, 0, root_address);
-		asm!("csrw satp, {}", in(reg)satp_val);
-        asm!("sfence.vma");
-	}
 }
 
 pub mod page_allocator;
