@@ -99,8 +99,11 @@ fn kmain() {
 	// Init os
 	init();
 
+	let lock = lock::SpinLock::new();
+	lock.lock();
 	// Print on screen
 	println!("\x1b[1m\x1b[32mWelcome on my rust risc-v operating system !!!\x1b[0m");
+	lock.unlock();
 }
 
 pub mod page_allocator;
@@ -110,3 +113,4 @@ pub mod kmalloc;
 pub mod trap;
 pub mod reg; 
 pub mod plic;
+pub mod lock;
