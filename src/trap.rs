@@ -37,17 +37,17 @@ extern "C" fn m_trap() -> usize
 			12 => {
 				// Instruction page fault
 				println!("Instruction page fault from core : {} -> 0x{:08x}", hart, tval);
-				return_pc += 4;
+				paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
 			},
 			13 => {
 				// Load page fault
 				println!("Load page fault from core : {} -> 0x{:08x}", hart, tval);
-				return_pc += 4;
+				paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
 			},
 			15 => {
 				// Store page fault
 				println!("Store page fault from core : {} -> 0x{:08x}", hart, tval);
-				return_pc += 4;
+				paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
 			},
             _ => {
                 println!("Unhandled interrupt! {}", cause_num);
