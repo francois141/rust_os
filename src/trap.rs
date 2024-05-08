@@ -15,11 +15,13 @@ extern "C" fn m_trap() -> usize
 	let hart = reg::mhartid_read();
 	let status = reg::mstatus_read();
 
+	let is_sync: bool = cause >> 63 & 1 == 0;
 	let is_async: bool = cause >> 63 & 1 == 1;
+
 
 	let cause_num = cause & 0xfff;
 
-	if !is_async {
+	if is_sync {
 		match cause_num {
 			9 => {
 				// Environment (system) call from Supervisor mode
@@ -57,6 +59,9 @@ extern "C" fn m_trap() -> usize
 
 	if is_async {
 		match cause_num {
+			7 => {
+				println!("Received a time interrupt")
+			}
 			11 => {
 				if let Some(interrupt_code) = plic::next_interrupt() {
 					match interrupt_code {
@@ -74,7 +79,7 @@ extern "C" fn m_trap() -> usize
 				}
 			} 
 			_ => {
-				println!("Unhandled async interrupt");
+				println!("Unhandled async interrupt {}", cause_num);
 			}
 		}
 	}

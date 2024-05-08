@@ -114,3 +114,4 @@ pub mod trap;
 pub mod reg; 
 pub mod plic;
 pub mod lock;
+pub mod process;
