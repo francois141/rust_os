@@ -60,7 +60,14 @@ extern "C" fn m_trap() -> usize
 	if is_async {
 		match cause_num {
 			7 => {
-				println!("Received a time interrupt")
+				unsafe {
+					// TODO: Make sure it is optimal : https://five-embeddev.com/riscv-priv-isa-manual/Priv-v1.12/machine.html#machine-timer-registers-mtime-and-mtimecmp 
+					let mtimecmp = 0x0200_4000 as *mut u64;
+					let time_second = 10_000_000;
+					mtimecmp.write_volatile(mtimecmp.read_volatile() + 3 * time_second);
+				  }
+				  
+				  println!("\x1b[0;33mReceived a timer interrupt\x1b[0m");
 			}
 			11 => {
 				if let Some(interrupt_code) = plic::next_interrupt() {
