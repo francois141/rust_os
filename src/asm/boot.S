@@ -87,17 +87,17 @@ _start:
 	la		t1, kmain
 	csrw	mepc, t1
 
+	# Setup trigger first timer interrupt
+	li      t0, 5000000
+	li      t1, 0x2004000
+	sd      t0, 0(t1)
+
 	# Setting Machine's interrupt-enable bits (`mie` register):
 	# 1 << 3 : Machine's M-mode software interrupt-enable bit is 1 (MSIE=1).
 	# 1 << 7 : Machine's timer interrupt-enable bit is 1 (MTIE=1).
 	# 1 << 11: Machine's external interrupt-enable bit is 1 (MEIE=1).
 	li		t3, (1 << 3) | (1 << 7) | (1 << 11)
 	csrw	mie, t3
-
-	# Setup trigger first timer interrupt
-	li      t0, 500000
-	li      t1, 0x2004000
-	sd      t0, 0(t1)
 
 	# Machine's trap vector base address is set to `asm_trap_vector`.
 	la		t2, asm_trap_vector
