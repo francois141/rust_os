@@ -81,6 +81,12 @@ fn init() {
 	// Init paging
 	paging::init();
 	paging::init_sanity_check();
+	println!("Paging : \x1b[32m[DONE]\x1b[0m");
+
+	// Init scheduler
+	scheduler::init();
+	scheduler::init_sanity_check();
+	println!("Scheduler : \x1b[32m[DONE]\x1b[0m");
 
 	// Install page table
 	unsafe {
@@ -90,7 +96,7 @@ fn init() {
 		asm!("sfence.vma");	
 	}
 
-	println!("Paging : \x1b[32m[DONE]\x1b[0m");
+	println!("Installing page table : \x1b[32m[DONE]\x1b[0m");
 }
 
 #[no_mangle]
@@ -115,3 +121,4 @@ pub mod reg;
 pub mod plic;
 pub mod lock;
 pub mod process;
+pub mod scheduler;
