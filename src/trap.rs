@@ -6,6 +6,10 @@ use core::fmt::Write;
 use crate::scheduler::SCHEDULER;
 use crate::uart;
 
+extern "C" {
+    fn switch_to_other_process(v1: usize, v2:usize) -> !;
+}
+
 #[no_mangle]
 extern "C" fn m_trap() -> usize {
     let mut return_pc = reg::mepc_read();
@@ -21,6 +25,27 @@ extern "C" fn m_trap() -> usize {
 
     if is_sync {
         match cause_num {
+            0 => {
+                panic!("Load access fault! [RECEIVED CODE 0]");
+            }
+            1 => {
+                panic!("Instruction access fault! [RECEIVED CODE 1]");
+            }
+            2 => {
+                panic!("Illegal instruction! [RECEIVED CODE 2]");
+            }
+            4 => {
+                panic!("Load address misaligned! [RECEIVED CODE 4]");
+            }
+            5 => {
+                panic!("Load access fault! [RECEIVED CODE 5]");
+            }
+            6 => {
+                panic!("Store address misaligned! [RECEIVED CODE 6]");
+            }
+            7 => {
+                panic!("Store access fault! [RECEIVED CODE 7]");
+            }
             9 => {
                 // Environment (system) call from Supervisor mode
                 println!(
@@ -71,14 +96,19 @@ extern "C" fn m_trap() -> usize {
                     // TODO: Make sure it is optimal : https://five-embeddev.com/riscv-priv-isa-manual/Priv-v1.12/machine.html#machine-timer-registers-mtime-and-mtimecmp
                     let mtimecmp = 0x0200_4000 as *mut u64;
                     let time_second = 10_000_000;
-                    mtimecmp.write_volatile(mtimecmp.read_volatile() + 1 * time_second);
+                    mtimecmp.write_volatile(mtimecmp.read_volatile() + 3 * time_second);
                 }
 
                 println!("\x1b[0;33mReceived a timer interrupt\x1b[0m");
 
                 unsafe {
                     // Get the next pc from scheduler
-                    return_pc = SCHEDULER.next();
+                    let (return_pc, value_store_stack) = SCHEDULER.next();
+                    
+                    // TODO: Return a non-wtf address to read from
+                    print!("{:x}\n", value_store_stack);
+                    // This function doesn't return
+                    switch_to_other_process(value_store_stack, return_pc);
                 }
             }
             11 => {

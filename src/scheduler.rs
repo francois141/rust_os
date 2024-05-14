@@ -1,3 +1,5 @@
+use core::ptr::addr_of;
+
 use crate::process::{self, Process};
 
 pub struct Scheduler {
@@ -37,12 +39,12 @@ impl Scheduler {
         current_scheduler
     }
 
-    pub fn next(&mut self) -> usize {
+    pub fn next(&mut self) -> (usize,usize) {
         self.counter += 1;
         if self.counter % 2 == 0 {
-            self.proc1.start_pc
+            (self.proc1.start_pc, addr_of!(self.proc1.frame) as usize)
         } else {
-            self.proc2.start_pc
+            (self.proc2.start_pc,  addr_of!(self.proc2.frame) as usize)
         }
     }
 }

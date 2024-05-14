@@ -106,6 +106,10 @@ _start:
 	# Set return address
 	la		ra, _end
 
+	# Set mscratch register in a predictive state for the first context switch
+	la t2, 0x80000 - 512
+	csrw mscratch, t2
+
 	# mret allows us to jump to supervisor mode
 	mret
 _end:

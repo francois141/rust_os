@@ -49,7 +49,7 @@ asm_trap_vector:
 	ld		ra, 0(sp)
 	ld		sp, 8(sp)
 	ld		gp, 16(sp)
-	# not tp (contains hartid), in case we moved CPUs
+	ld		tp, 24(sp)
 	ld		t0, 32(sp)
 	ld		t1, 40(sp)
 	ld		t2, 48(sp)
@@ -80,6 +80,56 @@ asm_trap_vector:
 
 	addi	sp, sp, 256
 
+	mret
+
+.global switch_to_other_process
+switch_to_other_process:
+
+	# Step 1 - Write trap frame pointer to mscratch
+	csrw mscratch, a0
+
+	# Step 2 - Write program counter 
+	#ld a1, 512(a1)
+	csrw mepc, a1
+	
+	# Step 3 - Setup correct page table (ignored for the moment)
+
+	# Step 4 - Restore general purpose registers
+	ld		ra, 0(a0)
+	ld		sp, 8(a0)
+	ld		gp, 16(a0)
+	ld		tp, 24(a0)
+	ld		t0, 32(a0)
+	ld		t1, 40(a0)
+	ld		t2, 48(a0)
+	ld		s0, 56(a0)
+	ld		s1, 64(a0)
+	ld		a1, 80(a0)
+	ld		a2, 88(a0)
+	ld		a3, 96(a0)
+	ld		a4, 104(a0)
+	ld		a5, 112(a0)
+	ld		a6, 120(a0)
+	ld		a7, 128(a0)
+	ld		s2, 136(a0)
+	ld		s3, 144(a0)
+	ld		s4, 152(a0)
+	ld		s5, 160(a0)
+	ld		s6, 168(a0)
+	ld		s7, 176(a0)
+	ld		s8, 184(a0)
+	ld		s9, 192(a0)
+	ld		s10, 200(a0)
+	ld		s11, 208(a0)
+	ld		t3, 216(a0)
+	ld		t4, 224(a0)
+	ld		t5, 232(a0)
+	ld		t6, 240(a0)
+	ld		a0, 72(a0)
+
+	# Step 5 - Restore floating point registers (ignored for the moment)
+
+	# Step 6 - jump to the user function (in the future, we jump to userspace)
 	mret
 
 
