@@ -2,3 +2,6 @@ target/*
 os.elf
 Cargo.lock
 hdd.dsk
+.idea/*
+.metals/*
+.vscode/*

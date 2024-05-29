@@ -105,8 +105,6 @@ extern "C" fn m_trap() -> usize {
                     // Get the next pc from scheduler
                     let (return_pc, value_store_stack) = SCHEDULER.next();
                     
-                    // TODO: Return a non-wtf address to read from
-                    print!("{:x}\n", value_store_stack);
                     // This function doesn't return
                     switch_to_other_process(value_store_stack, return_pc);
                 }

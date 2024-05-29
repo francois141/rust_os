@@ -55,6 +55,7 @@ extern "C" {
 	static HEAP_START: usize;
 	static HEAP_SIZE: usize;
 	static HEAP_END: usize;
+	static KERNEL_STACK_END: usize;
 }
 
 
