@@ -34,10 +34,10 @@ impl Scheduler {
     }
 
     pub fn next(&mut self) -> (usize,usize) {
-        let mut addr = 0 as usize;
         unsafe {
-            println!("addr {} {}", (*(self.proc1.frame)).pc as usize, self.proc1.pc);
+            println!("{} {}", self.proc1.pc, (*self.proc1.frame).pc);
         }
+        
 
         (self.proc1.pc, addr_of!(self.proc1.frame) as usize)
     }

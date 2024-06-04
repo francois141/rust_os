@@ -99,7 +99,7 @@ extern "C" fn m_trap() -> usize {
                     mtimecmp.write_volatile(mtimecmp.read_volatile() + 3 * time_second);
                 }
 
-                println!("\x1b[0;33mReceived a timer interrupt\x1b[0m");
+                println!("\x1b[0;33mReceived a timer interrupt \x1b[0m");
 
                 unsafe {
                     // Get the next pc from scheduler

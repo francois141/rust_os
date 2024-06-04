@@ -18,6 +18,7 @@ pub struct ProcessFrame {
   pub pc: usize, // 248 - 255
   pub floating_points_registers:      [usize; 32], // Use later
 
+
 }
 
 
@@ -27,12 +28,11 @@ impl Process {
 
     let nb_pages_to_allocate = 10;
 
-    println!("{}", start_pc);
 
     let mut processFrame = ProcessFrame {
       registers: [0;31],
-      pc: start_pc,
       floating_points_registers: [0;32],
+      pc: start_pc,
     };
 
     // TODO: Make the number of pages parametrizable
@@ -45,7 +45,8 @@ impl Process {
 
 		unsafe {
 			(*process.frame).registers[1] = process.stack as usize + nb_pages_to_allocate*PAGE_SIZE; // TODO : Improve that
-		}
+      (*process.frame).pc = start_pc; 
+    }
 
     // We don't need to map the stack at this point. We operate under lazy mapping
     // Finally we can return the process
@@ -74,14 +75,5 @@ pub fn process1() {
     println!("We are in process 1! {}", counter);
     for x in 0..1000000 {}
     counter = (counter + 1) % 100000;
-  }
-}
-
-pub fn process2() {
-  let mut counter = 0;
-  loop {
-    println!("We are in process 2! {}", counter);
-    for x in 0..3000000 {}
-    counter += 1;
   }
 }
