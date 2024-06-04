@@ -1,17 +1,14 @@
 use core::ptr::addr_of;
 
 use crate::process::{self, Process};
+use core::fmt::Write;
 
 pub struct Scheduler {
     proc1: process::Process,
-    proc2: process::Process,
-    counter: u32,
 }
 
 pub static mut SCHEDULER: Scheduler = Scheduler {
     proc1: Process::null_proc(),
-    proc2: Process::null_proc(),
-    counter: 0,
 };
 
 pub fn init() {
@@ -28,24 +25,21 @@ impl Scheduler {
     pub fn new_scheduler() -> Self {
 
         let proc1 = process::Process::new_process(process::process1 as usize);
-        let proc2 = process::Process::new_process(process::process2 as usize);
 
         let current_scheduler = Scheduler{
             proc1: proc1,
-            proc2: proc2,
-            counter: 0,
         };
 
         current_scheduler
     }
 
     pub fn next(&mut self) -> (usize,usize) {
-        self.counter += 1;
-        if self.counter % 2 == 0 {
-            (self.proc1.start_pc, addr_of!(self.proc1.frame) as usize)
-        } else {
-            (self.proc2.start_pc,  addr_of!(self.proc2.frame) as usize)
+        let mut addr = 0 as usize;
+        unsafe {
+            println!("addr {} {}", (*(self.proc1.frame)).pc as usize, self.proc1.pc);
         }
+
+        (self.proc1.pc, addr_of!(self.proc1.frame) as usize)
     }
 }
 
