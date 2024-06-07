@@ -90,9 +90,6 @@ asm_trap_vector:
 	ld		t5, 232(t6)
 	ld		t6, 240(t6)
 
-
-	addi	sp, sp, 256
-
 	mret
 
 .global switch_to_other_process
@@ -139,10 +136,6 @@ switch_to_other_process:
 	ld		t4, 224(t6)
 	ld		t5, 232(t6)
 	ld		t6, 240(t6)
-
-
-	addi	sp, sp, 512
-
 
 	# Step 5 - Restore floating point registers (ignored for the moment)
 
