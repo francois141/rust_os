@@ -84,7 +84,6 @@ fn kmain() {
 
 pub mod page_allocator;
 pub mod uart;
-pub mod paging;
 pub mod trap;
 pub mod reg; 
 pub mod plic;
