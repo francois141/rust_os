@@ -35,7 +35,7 @@ impl Scheduler {
 
     pub fn next(&mut self) -> (usize,usize) {
         unsafe {
-            println!("{} {}", self.proc1.pc, (*self.proc1.frame).pc);
+            println!("{}", self.proc1.frame as usize);
         }
         
 

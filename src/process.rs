@@ -1,4 +1,4 @@
-use core::ptr::{null, null_mut};
+use core::{fmt::write, ptr::{null, null_mut}};
 
 use crate::{page_allocator::{self, PAGE_SIZE}, paging};
 use core::fmt::Write;
@@ -42,7 +42,6 @@ impl Process {
       frame: &mut processFrame,
     };
 
-
 		unsafe {
 			(*process.frame).registers[1] = process.stack as usize + nb_pages_to_allocate*PAGE_SIZE; // TODO : Improve that
       (*process.frame).pc = start_pc; 
@@ -70,10 +69,7 @@ impl Process {
 }
 
 pub fn process1() {
-  let mut counter = 0;
   loop {
-    println!("We are in process 1! {}", counter);
-    for x in 0..1000000 {}
-    counter = (counter + 1) % 100000;
+    crate::uart::Uart::get();
   }
 }

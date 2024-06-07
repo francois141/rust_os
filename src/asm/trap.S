@@ -59,7 +59,7 @@ asm_trap_vector:
 
 	# Load register backs
 	ld		ra, 0(t6)
-	ld		sp, 8(t6)
+	li		sp, 2149347328
 	ld		gp, 16(t6)
 	ld		tp, 24(t6)
 	ld		t0, 32(t6)

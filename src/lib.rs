@@ -79,23 +79,12 @@ fn init() {
 	plic::init_sanity_check();
 	println!("Plic : \x1b[32m[DONE]\x1b[0m");
 	
-	// Init paging
-	paging::init();
-	paging::init_sanity_check();
-	println!("Paging : \x1b[32m[DONE]\x1b[0m");
 
 	// Init scheduler
 	scheduler::init();
 	scheduler::init_sanity_check();
 	println!("Scheduler : \x1b[32m[DONE]\x1b[0m");
 
-	// Install page table
-	unsafe {
-		let root_address = (paging::ROOT) as usize;
-		let satp_val = paging::craft_satp(8, 0, root_address);
-		asm!("csrw satp, {}", in(reg)satp_val);
-		asm!("sfence.vma");	
-	}
 
 	println!("Installing page table : \x1b[32m[DONE]\x1b[0m");
 }
