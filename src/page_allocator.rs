@@ -141,28 +141,3 @@ pub fn dealloc(pointer: *mut u8) {
         (*page_pointer).clear_all_flags();
     }
 }
-
-
-pub fn init_sanity_check() {
-    // Check we allocate in the correct zone
-    let first_alloc = alloc(1);
-    assert!(first_alloc >  0x80000000 as *mut u8);
-
-    // Check if we deallocate correctly
-    dealloc(first_alloc);
-
-    // Assert first allocation is equal second allocation
-    let second_alloc = alloc(1);
-    assert!(first_alloc == second_alloc);
-
-    // Test bigger allocation
-    let third_alloc = alloc(0x100);
-
-    // Make sure we allocate first page again
-    dealloc(second_alloc);
-    let last_alloc = alloc(1);
-    assert!(first_alloc == last_alloc);
-
-    // Free all the memory for the operating systems
-    dealloc(third_alloc);
-}

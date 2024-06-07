@@ -13,10 +13,6 @@ pub fn init() {
 	set_priority(UART_DEVICE, 1);
 }
 
-pub fn init_sanity_check() {
-
-}
-
 pub fn enable_device(id: u32) {
     let plic_enable_mask = PLIT_INT_ENABLE_TABLE as *mut u32;
     unsafe {

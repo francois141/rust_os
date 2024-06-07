@@ -59,7 +59,7 @@ asm_trap_vector:
 
 	# Load register backs
 	ld		ra, 0(t6)
-	li		sp, 2149347328
+	ld		sp, 8(t6)
 	ld		gp, 16(t6)
 	ld		tp, 24(t6)
 	ld		t0, 32(t6)
@@ -141,13 +141,11 @@ switch_to_other_process:
 	ld		t6, 240(t6)
 
 
+	addi	sp, sp, 512
+
+
 	# Step 5 - Restore floating point registers (ignored for the moment)
 
 	# Step 6 - jump to the user function (in the future, we jump to userspace)
 	mret
 
-
-.global make_syscall
-make_syscall:
-	ecall
-	ret

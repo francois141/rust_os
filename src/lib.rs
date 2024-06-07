@@ -62,31 +62,17 @@ extern "C" {
 fn init() {
 	// Setup driver
 	uart::Uart::start_driver(0x1000_0000);
-	println!("Uart driver : \x1b[32m[DONE]\x1b[0m");
+
 
 	// Init page allocator
 	page_allocator::init_allocator();
-	page_allocator::init_sanity_check();
-	println!("Page allocator : \x1b[32m[DONE]\x1b[0m");
-
-	// Init memory allocator
-	kmalloc::init();
-	kmalloc::init_sanity_check();
-	println!("Memory allocator : \x1b[32m[DONE]\x1b[0m");
 
 	// Init plic
 	plic::init();
-	plic::init_sanity_check();
-	println!("Plic : \x1b[32m[DONE]\x1b[0m");
-	
 
+	
 	// Init scheduler
 	scheduler::init();
-	scheduler::init_sanity_check();
-	println!("Scheduler : \x1b[32m[DONE]\x1b[0m");
-
-
-	println!("Installing page table : \x1b[32m[DONE]\x1b[0m");
 }
 
 #[no_mangle]
@@ -94,21 +80,13 @@ extern "C"
 fn kmain() {
 	// Init os
 	init();
-
-	let lock = lock::SpinLock::new();
-	lock.lock();
-	// Print on screen
-	println!("\x1b[1m\x1b[32mWelcome on my rust risc-v operating system !!!\x1b[0m");
-	lock.unlock();
 }
 
 pub mod page_allocator;
 pub mod uart;
 pub mod paging;
-pub mod kmalloc;
 pub mod trap;
 pub mod reg; 
 pub mod plic;
-pub mod lock;
 pub mod process;
 pub mod scheduler;
