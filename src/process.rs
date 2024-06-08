@@ -1,6 +1,6 @@
 use core::{fmt::write, ptr::{null, null_mut}};
 
-use crate::{page_allocator::{self, PAGE_SIZE}, paging};
+use crate::{page_allocator::{self, PAGE_SIZE}};
 use core::fmt::Write;
 
 #[repr(C)]

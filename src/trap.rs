@@ -1,4 +1,4 @@
-use crate::paging;
+
 use crate::plic;
 use crate::reg;
 use core::fmt::Write;
@@ -71,17 +71,14 @@ extern "C" fn m_trap() -> usize {
                     "Instruction page fault from core : {} -> 0x{:08x}",
                     hart, tval
                 );
-                paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
             }
             13 => {
                 // Load page fault
                 println!("Load page fault from core : {} -> 0x{:08x}", hart, tval);
-                paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
             }
             15 => {
                 // Store page fault
                 println!("Store page fault from core : {} -> 0x{:08x}", hart, tval);
-                paging::map(tval, tval, paging::EntryBits::ReadWriteExecute.val());
             }
             _ => {
                 println!("Unhandled interrupt! {}", cause_num);

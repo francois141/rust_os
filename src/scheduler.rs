@@ -17,10 +17,6 @@ pub fn init() {
     }
 }
 
-pub fn init_sanity_check() {
-
-}
-
 impl Scheduler {
     pub fn new_scheduler() -> Self {
 
