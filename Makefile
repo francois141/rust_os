@@ -3,7 +3,7 @@
 #####
 CC=/opt/riscv64_1/bin/riscv64-unknown-linux-gnu-g++
 CFLAGS=-Wall -Wextra -pedantic -Wextra -O0 -g -std=c++17
-CFLAGS+=-static -ffreestanding -nostdlib -fno-rtti -fno-exceptions
+CFLAGS+=-static -ffreestanding -nostdlib -fno-rtti -fno-exceptions -fverbose-asm
 CFLAGS+=-march=rv64gc -mabi=lp64d
 INCLUDES=
 LINKER_SCRIPT=-Tsrc/lds/virt.lds

@@ -5,6 +5,13 @@ use core::ptr::addr_of;
 use core::fmt::Write;
 use core::arch::asm;
 
+use page_allocator::alloc;
+use process::process1;
+
+
+extern "C" {
+    fn switch_to_other_process(v1: usize, v2:usize) -> !;
+}
 
 #[macro_export]
 macro_rules! print {
@@ -31,7 +38,6 @@ macro_rules! println {
 	});
 }
 
-
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
 	print!("Aborting: ");
@@ -49,30 +55,18 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 	loop {}
 }
 
-extern "C" {
-	static BSS_START: usize;
-	static BSS_END: usize;
-	static HEAP_START: usize;
-	static HEAP_SIZE: usize;
-	static HEAP_END: usize;
-	static KERNEL_STACK_END: usize;
-}
-
-
 fn init() {
 	// Setup driver
 	uart::Uart::start_driver(0x1000_0000);
 
-
 	// Init page allocator
 	page_allocator::init_allocator();
 
-	// Init plic
-	plic::init();
 
-	
-	// Init scheduler
-	scheduler::init();
+	// Jump to init process
+	unsafe {
+		switch_to_other_process(0 , process::process1 as usize);
+	}
 }
 
 #[no_mangle]
@@ -88,4 +82,3 @@ pub mod trap;
 pub mod reg; 
 pub mod plic;
 pub mod process;
-pub mod scheduler;

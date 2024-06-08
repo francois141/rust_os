@@ -1,9 +1,10 @@
 
 use crate::plic;
+use crate::process::process1;
 use crate::reg;
 use core::fmt::Write;
+use crate::page_allocator;
 
-use crate::scheduler::SCHEDULER;
 use crate::uart;
 
 extern "C" {
@@ -11,7 +12,7 @@ extern "C" {
 }
 
 #[no_mangle]
-extern "C" fn m_trap() -> usize {
+extern "C" fn m_trap() -> (usize,usize) {
     let mut return_pc = reg::mepc_read();
     let tval = reg::mtval_read();
     let cause = reg::mcause_read();
@@ -100,10 +101,9 @@ extern "C" fn m_trap() -> usize {
 
                 unsafe {
                     // Get the next pc from scheduler
-                    let (return_pc, value_store_stack) = SCHEDULER.next();
-                    
+
                     // This function doesn't return
-                    switch_to_other_process(value_store_stack, return_pc);
+                    // switch_to_other_process(value_store_stack, return_pc);
                 }
             }
             11 => {
@@ -128,7 +128,7 @@ extern "C" fn m_trap() -> usize {
         }
     }
 
-    return_pc
+    (return_pc, page_allocator::alloc(1) as usize)
 }
 
 fn print_uart_value() {
