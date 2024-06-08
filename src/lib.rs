@@ -10,7 +10,7 @@ use process::process1;
 
 
 extern "C" {
-    fn switch_to_other_process(v1: usize, v2:usize) -> !;
+    fn switch_to_other_process(v1: usize) -> !;
 }
 
 #[macro_export]
@@ -64,7 +64,7 @@ fn init() {
 
 	// Jump to init process
 	unsafe {
-		switch_to_other_process(0 , process::process1 as usize);
+		switch_to_other_process(process::process1 as usize);
 	}
 }
 

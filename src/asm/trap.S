@@ -53,7 +53,6 @@ asm_trap_vector:
 
 	csrr t6, mscratch
 	
-
 	# Load register backs
 	ld		ra, 0(t6)
 	ld		sp, 8(t6)
@@ -91,13 +90,45 @@ asm_trap_vector:
 
 .global switch_to_other_process
 switch_to_other_process:
+	# Restore Machine Exception Program Counter with return address
+	csrw	mepc, a0
 
 
-	# Step 2 - Write program counter 
-	csrw mepc, a1
+	csrr t6, mscratch
+	
+	# Load register backs
+	ld		ra, 0(t6)
+	// This is the first problem
+	// ld		sp, 8(t6)
+	ld		gp, 16(t6)
+	ld		tp, 24(t6)
+	ld		t0, 32(t6)
+	ld		t1, 40(t6)
+	ld		t2, 48(t6)
+	ld		s0, 56(t6)
+	ld		s1, 64(t6)
+	ld		a0, 72(t6)
+	ld		a1, 80(t6)
+	ld		a2, 88(t6)
+	ld		a3, 96(t6)
+	ld		a4, 104(t6)
+	ld		a5, 112(t6)
+	ld		a6, 120(t6)
+	ld		a7, 128(t6)
+	ld		s2, 136(t6)
+	ld		s3, 144(t6)
+	ld		s4, 152(t6)
+	ld		s5, 160(t6)
+	ld		s6, 168(t6)
+	ld		s7, 176(t6)
+	ld		s8, 184(t6)
+	ld		s9, 192(t6)
+	ld		s10, 200(t6)
+	ld		s11, 208(t6)
+	ld		t3, 216(t6)
+	ld		t4, 224(t6)
+	ld		t5, 232(t6)
+	ld		t6, 240(t6)
 
-	# Step 5 - Restore floating point registers (ignored for the moment)
-
-	# Step 6 - jump to the user function (in the future, we jump to userspace)
 	mret
 

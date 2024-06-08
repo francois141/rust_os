@@ -14,11 +14,14 @@ pub struct ProcessFrame {
 
 
 pub fn process1() {
-  let mut counter = 0;
+  let mut a = 0;
+  let mut counter:u64 = 0;
   loop {
     counter += 1;
-    if counter % 1000000 == 0 {
-      println!("tick");
+    if counter % 100000000 == 0 {
+      println!("tick {}", a);
+      a += 1;
+      counter = 0
     }
   }
 }

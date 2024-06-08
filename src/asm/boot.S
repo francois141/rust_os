@@ -80,7 +80,7 @@ _start:
 	# 0b01 << 11: Machine's previous protection mode is 1 (MPP=1). --> We enter in supervisor mode
 	# 1 << 7    : Machine's previous interrupt-enable bit is 1 (MPIE=1).
 	# 1 << 3    : Machine's interrupt-enable bit is 1 (MIE=1).
-	li t0, (0b01 << 11) | (1 << 7) | (1 << 3)
+	li t0, (0b11 << 11) | (1 << 7) | (1 << 3)
 	csrw	mstatus, t0
 
 	# Machine's exception program counter (MEPC) is set to `kinit`.
@@ -88,7 +88,7 @@ _start:
 	csrw	mepc, t1
 
 	# Setup trigger first timer interrupt
-	li      t0, 5000000
+	li      t0, 500000000
 	li      t1, 0x2004000
 	sd      t0, 0(t1)
 
