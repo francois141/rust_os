@@ -113,31 +113,3 @@ pub fn alloc(pages: usize) -> *mut u8 {
     // Failure
     null_mut()
 }
-
-pub fn dealloc(pointer: *mut u8) {
-    // Safety assertion
-    assert!(!pointer.is_null());
-
-    unsafe {
-        // Convert pointer to page address
-        let page_structure_address = HEAP_START + (pointer as usize - ALLOC_START) / PAGE_SIZE;
-
-        // Safety assertion
-        assert!(HEAP_START <= page_structure_address && page_structure_address < HEAP_START + HEAP_SIZE);
-
-        let mut page_pointer = page_structure_address as *mut Page;
-
-        while (*page_pointer).taken() && !(*page_pointer).last() {
-            // Clear page pointer
-            (*page_pointer).clear_all_flags();
-            // Move to the next one
-            page_pointer = page_pointer.add(1);
-        }
-
-        // Check for double free
-        assert!((*page_pointer).last() == true, "Possible double free here");
-
-        // Clear the last page
-        (*page_pointer).clear_all_flags();
-    }
-}

@@ -62,7 +62,6 @@ fn init() {
 	// Init page allocator
 	page_allocator::init_allocator();
 
-
 	// Jump to init process
 	unsafe {
 		switch_to_other_process(0 , process::process1 as usize);
