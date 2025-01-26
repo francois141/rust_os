@@ -1,10 +1,10 @@
-use core::ptr::null_mut;
 use core::mem::size_of;
+use core::ptr::null_mut;
 
-extern "C" {
-	static HEAP_START: usize;
-	static HEAP_SIZE: usize;
-}
+use crate::_heap_start;
+
+// TODO: Fix it dynamically
+const HEAP_SIZE: usize = 0x1000000;
 
 static EMPTY_PAGE: u8 = 0x0;
 static TAKEN_FLAG: u8 = 0x1;
@@ -46,42 +46,42 @@ static mut ALLOC_START: usize = 0;
 pub static mut ALLOCATED_PAGE_HEAP_ALLOCATOR: usize = 0;
 
 pub const fn page_align_round_up(val: usize) -> usize {
-	let o = 4096 - 1;
-	(val + o) & !o
+    let o = 4096 - 1;
+    (val + o) & !o
 }
-
 
 pub fn init_allocator() {
     unsafe {
         ALLOCATED_PAGE_HEAP_ALLOCATOR = HEAP_SIZE / PAGE_SIZE;
-        let pointer = HEAP_START as *mut Page;
-        
+
+        let pointer = (&raw const _heap_start as usize) as *mut Page;
+
         // Reserve some place for the page allocator
-        ALLOC_START = page_align_round_up(HEAP_START + ALLOCATED_PAGE_HEAP_ALLOCATOR * size_of::<Page>());
+        ALLOC_START = page_align_round_up(
+            (&raw const _heap_start as usize) + ALLOCATED_PAGE_HEAP_ALLOCATOR * size_of::<Page>(),
+        );
 
         // Clear pages for security reason
-        for i in 0 .. ALLOCATED_PAGE_HEAP_ALLOCATOR {
+        for i in 0..ALLOCATED_PAGE_HEAP_ALLOCATOR {
             (*pointer.add(i)).clear_all_flags();
         }
     }
 }
 
 pub fn alloc(pages: usize) -> *mut u8 {
-
     // Safety assertion
     assert!(pages > 0);
 
     unsafe {
-        let pointer = HEAP_START as *mut Page;
-        let number_pages:usize = HEAP_SIZE / PAGE_SIZE;
+        let pointer = (&raw const _heap_start as usize) as *mut Page;
+        let number_pages: usize = HEAP_SIZE / PAGE_SIZE;
 
-        for i in 0..number_pages  {
-
-            if(*pointer.add(i)).free() {
+        for i in 0..number_pages {
+            if (*pointer.add(i)).free() {
                 let mut good = true;
 
                 for j in i..i + pages {
-                    if(*pointer.add(j)).taken() {
+                    if (*pointer.add(j)).taken() {
                         good = false;
                         break;
                     }
@@ -92,22 +92,20 @@ pub fn alloc(pages: usize) -> *mut u8 {
                     for j in i..i + pages {
                         (*pointer.add(j)).set_flag(TAKEN_FLAG);
                     }
-                    
 
                     (*pointer.add(i + pages - 1)).set_flag(LAST_FLAG);
 
                     let raw_pointer = (ALLOC_START + PAGE_SIZE * i) as *mut u64;
 
                     // Clear pages for security reasons
-                    for offset in 0..PAGE_SIZE * pages/8 {
+                    for offset in 0..PAGE_SIZE * pages / 8 {
                         (*raw_pointer.add(offset)) = 0;
                     }
 
-                    return raw_pointer as *mut u8
+                    return raw_pointer as *mut u8;
                 }
             }
         }
-
     }
 
     // Failure
@@ -120,10 +118,14 @@ pub fn dealloc(pointer: *mut u8) {
 
     unsafe {
         // Convert pointer to page address
-        let page_structure_address = HEAP_START + (pointer as usize - ALLOC_START) / PAGE_SIZE;
+        let page_structure_address =
+            (&raw const _heap_start as usize) + (pointer as usize - ALLOC_START) / PAGE_SIZE;
 
         // Safety assertion
-        assert!(HEAP_START <= page_structure_address && page_structure_address < HEAP_START + HEAP_SIZE);
+        assert!(
+            (&raw const _heap_start as usize) <= page_structure_address
+                && page_structure_address < (&raw const _heap_start as usize) + HEAP_SIZE
+        );
 
         let mut page_pointer = page_structure_address as *mut Page;
 
@@ -142,11 +144,10 @@ pub fn dealloc(pointer: *mut u8) {
     }
 }
 
-
 pub fn init_sanity_check() {
     // Check we allocate in the correct zone
     let first_alloc = alloc(1);
-    assert!(first_alloc >  0x80000000 as *mut u8);
+    assert!(first_alloc > 0x80000000 as *mut u8);
 
     // Check if we deallocate correctly
     dealloc(first_alloc);

@@ -13,22 +13,17 @@ pub static mut SCHEDULER: Scheduler = Scheduler {
 };
 
 pub fn init() {
-    unsafe {
-        SCHEDULER = Scheduler::new_scheduler()
-    }
+    unsafe { SCHEDULER = Scheduler::new_scheduler() }
 }
 
-pub fn init_sanity_check() {
-
-}
+pub fn init_sanity_check() {}
 
 impl Scheduler {
     pub fn new_scheduler() -> Self {
-
         let proc1 = process::Process::new_process(process::process1 as usize);
         let proc2 = process::Process::new_process(process::process2 as usize);
 
-        let current_scheduler = Scheduler{
+        let current_scheduler = Scheduler {
             proc1: proc1,
             proc2: proc2,
             counter: 0,
@@ -46,4 +41,3 @@ impl Scheduler {
         }
     }
 }
-

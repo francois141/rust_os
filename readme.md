@@ -1,3 +1,3 @@
 # My custom rust operating system
 
-Rust operating systems written for risc-v architecture
+Rust operating system written for the risc-v architecture

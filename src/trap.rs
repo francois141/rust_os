@@ -1,10 +1,9 @@
-use crate::paging;
 use crate::plic;
 use crate::reg;
-use core::fmt::Write;
-
 use crate::scheduler::SCHEDULER;
 use crate::uart;
+use crate::{paging, print, println};
+use core::fmt::Write;
 
 #[no_mangle]
 extern "C" fn m_trap() -> usize {
@@ -12,7 +11,6 @@ extern "C" fn m_trap() -> usize {
     let tval = reg::mtval_read();
     let cause = reg::mcause_read();
     let hart = reg::mhartid_read();
-    let status = reg::mstatus_read();
 
     let is_sync: bool = cause >> 63 & 1 == 0;
     let is_async: bool = cause >> 63 & 1 == 1;

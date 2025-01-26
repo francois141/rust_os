@@ -1,5 +1,5 @@
-use core::fmt::Write;
 use core::fmt::Error;
+use core::fmt::Write;
 
 static RECEIVER_OFFSET: usize = 0;
 static TRANSMITTER_OFFSET: usize = 0;
@@ -12,24 +12,23 @@ static DATA_READY_MASK: u8 = 0x1;
 
 pub static UART_BASE_ADDRESS: usize = 0x1000_0000;
 
-
 pub struct Uart {
     base_address: usize,
 }
 
 impl Write for Uart {
-	fn write_str(&mut self, out: &str) -> Result<(), Error> {
-		for c in out.bytes() {
-			self.write(c);
-		}
-		Ok(())
-	}
+    fn write_str(&mut self, out: &str) -> Result<(), Error> {
+        for c in out.bytes() {
+            self.write(c);
+        }
+        Ok(())
+    }
 }
 
 impl Uart {
     pub fn get() -> Self {
         Uart {
-            base_address: 0x1000_0000
+            base_address: 0x1000_0000,
         }
     }
 
@@ -38,15 +37,20 @@ impl Uart {
 
         unsafe {
             // Set word length
-            pointer.add(LINE_CONTROL_REGISTER_OFFSET).write_volatile(0x2);
+            pointer
+                .add(LINE_CONTROL_REGISTER_OFFSET)
+                .write_volatile(0x2);
 
             // Enable fifo
-            pointer.add(FIFO_CONTROL_REGISTER_OFFSET).write_volatile(0x1);
+            pointer
+                .add(FIFO_CONTROL_REGISTER_OFFSET)
+                .write_volatile(0x1);
 
             // Enable receiver buffer interrups
-            pointer.add(INTERRUPT_ENABLE_REGISTER_OFFSET).write_volatile(0x1);
+            pointer
+                .add(INTERRUPT_ENABLE_REGISTER_OFFSET)
+                .write_volatile(0x1);
         }
-
 
         0
     }
@@ -57,8 +61,7 @@ impl Uart {
         unsafe {
             if pointer.add(LINE_STATUS_REGISTER_OFFSET).read_volatile() & DATA_READY_MASK == 0 {
                 None
-            } 
-            else {
+            } else {
                 Some(pointer.add(RECEIVER_OFFSET).read_volatile())
             }
         }
