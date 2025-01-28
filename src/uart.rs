@@ -67,8 +67,21 @@ impl Uart {
         }
     }
 
-    pub fn write(&mut self, payload: u8) {
+    pub fn is_line_busy(&mut self) -> bool {
+        // Line Status Register
+        const LSR_OFFSET: usize = 0x05;
+        // Transmit Holding Register Empty
+        const LSR_THRE: u8 = 0x20;
+
         let pointer = self.base_address as *mut u8;
+
+        unsafe { pointer.add(LSR_OFFSET).read_volatile() & LSR_THRE == 0 }
+    }
+
+    fn write(&mut self, payload: u8) {
+        let pointer = self.base_address as *mut u8;
+
+        while self.is_line_busy() {}
 
         unsafe {
             pointer.add(TRANSMITTER_OFFSET).write_volatile(payload);
