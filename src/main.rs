@@ -101,18 +101,21 @@ _start:
 	li		sp, 0x80f00000
 	# ld		sp, __stack_end
 	# Setting `mstatus` register:
-	# 0b01 << 11: Machine's previous protection mode is 1 (MPP=1). --> We enter in supervisor mode
+	# 0b11 << 11: Machine's previous protection mode is 11 (MPP=1). --> We enter in supervisor mode
 	# 1 << 7    : Machine's previous interrupt-enable bit is 1 (MPIE=1).
 	# 1 << 3    : Machine's interrupt-enable bit is 1 (MIE=1).
-	li t0, (0b01 << 11) | (1 << 7) | (1 << 3)
+	li t0, (0b11 << 11) | (1 << 7) | (1 << 3)
 	csrw	mstatus, t0
+
+    # Jump to harware initialisation code
+    jal init
 
 	# Machine's exception program counter (MEPC) is set to `kinit`.
 	la		t1, kmain
 	csrw	mepc, t1
 
 	# Setup trigger first timer interrupt
-	li      t0, 50000000
+	li      t0, 5000000
 	li      t1, 0x2004000
 	sd      t0, 0(t1)
 
@@ -127,8 +130,43 @@ _start:
 	la		t2, asm_trap_vector
 	csrw	mtvec, t2
 
-	# Set return address
-	la		ra, _end
+	# Jump now to the kernel process
+	csrr tp, mscratch
+
+	# Load program counter
+	ld a0, 264(tp)
+	csrw	mepc, a0
+
+	ld		ra, 0(tp)
+	ld		sp, 8(tp)
+	ld		gp, 16(tp)
+	// ld	    tp, 24(tp)
+	ld		t0, 32(tp)
+	ld		t1, 40(tp)
+	ld		t2, 48(tp)
+	ld		s0, 56(tp)
+	ld		s1, 64(tp)
+	ld		a0, 72(tp)
+	ld		a1, 80(tp)
+	ld		a2, 88(tp)
+	ld		a3, 96(tp)
+	ld		a4, 104(tp)
+	ld		a5, 112(tp)
+	ld		a6, 120(tp)
+	ld		a7, 128(tp)
+	ld		s3, 144(tp)
+	ld		s4, 152(tp)
+	ld		s5, 160(tp)
+	ld		s6, 168(tp)
+	ld		s7, 176(tp)
+	ld		s8, 184(tp)
+	ld		s9, 192(tp)
+	ld		s10, 200(tp)
+	ld		s11, 208(tp)
+	ld		t3, 216(tp)
+	ld		t4, 224(tp)
+	ld		t5, 232(tp)
+	ld		t6, 240(tp)
 
 	# mret allows us to jump to supervisor mode
 	mret
@@ -154,85 +192,98 @@ global_asm!(
 # of this vector.
 .align 4
 asm_trap_vector:
-	addi	sp, sp, -256
+
+    # Switch t6 with mscratch
+    csrrw	t6, mscratch, t6
 
 	# save the registers.
-	sd		ra, 0(sp)
-	sd		sp, 8(sp)
-	sd		gp, 16(sp)
-	sd		tp, 24(sp)
-	sd		t0, 32(sp)
-	sd		t1, 40(sp)
-	sd		t2, 48(sp)
-	sd		s0, 56(sp)
-	sd		s1, 64(sp)
-	sd		a0, 72(sp)
-	sd		a1, 80(sp)
-	sd		a2, 88(sp)
-	sd		a3, 96(sp)
-	sd		a4, 104(sp)
-	sd		a5, 112(sp)
-	sd		a6, 120(sp)
-	sd		a7, 128(sp)
-	sd		s2, 136(sp)
-	sd		s3, 144(sp)
-	sd		s4, 152(sp)
-	sd		s5, 160(sp)
-	sd		s6, 168(sp)
-	sd		s7, 176(sp)
-	sd		s8, 184(sp)
-	sd		s9, 192(sp)
-	sd		s10, 200(sp)
-	sd		s11, 208(sp)
-	sd		t3, 216(sp)
-	sd		t4, 224(sp)
-	sd		t5, 232(sp)
-	sd		t6, 240(sp)
+	sd		ra, 0(t6)
+	sd		sp, 8(t6)
+	sd		gp, 16(t6)
+	sd		tp, 24(t6)
+	sd		t0, 32(t6)
+	sd		t1, 40(t6)
+	sd		t2, 48(t6)
+	sd		s0, 56(t6)
+	sd		s1, 64(t6)
+	sd		a0, 72(t6)
+	sd		a1, 80(t6)
+	sd		a2, 88(t6)
+	sd		a3, 96(t6)
+	sd		a4, 104(t6)
+	sd		a5, 112(t6)
+	sd		a6, 120(t6)
+	sd		a7, 128(t6)
+	sd		s2, 136(t6)
+	sd		s3, 144(t6)
+	sd		s4, 152(t6)
+	sd		s5, 160(t6)
+	sd		s6, 168(t6)
+	sd		s7, 176(t6)
+	sd		s8, 184(t6)
+	sd		s9, 192(t6)
+	sd		s10, 200(t6)
+	sd		s11, 208(t6)
+	sd		t3, 216(t6)
+	sd		t4, 224(t6)
+	sd		t5, 232(t6)
+	sd		t6, 240(t6)
 
+    # Store the current pc in the process structure
+    csrr tp, mepc
+    sd tp, 264(t6)
+
+    # Finally, we can store t6 in the process structure
+	mv		t5, t6
+	csrr	t6, mscratch
+	csrw mscratch, t5
+
+    # Jump now to the trap handler
 	call	m_trap
 
-	# Restore Machine Exception Program Counter with return address
+	# Jump now to the kernel process
+	csrr tp, mscratch
+
+	# Load program counter
+	ld a0, 264(tp)
 	csrw	mepc, a0
 
-	# Load register backs
-	ld		ra, 0(sp)
-	ld		sp, 8(sp)
-	ld		gp, 16(sp)
-	# not tp (contains hartid), in case we moved CPUs
-	ld		t0, 32(sp)
-	ld		t1, 40(sp)
-	ld		t2, 48(sp)
-	ld		s0, 56(sp)
-	ld		s1, 64(sp)
-	ld		a0, 72(sp)
-	ld		a1, 80(sp)
-	ld		a2, 88(sp)
-	ld		a3, 96(sp)
-	ld		a4, 104(sp)
-	ld		a5, 112(sp)
-	ld		a6, 120(sp)
-	ld		a7, 128(sp)
-	ld		s2, 136(sp)
-	ld		s3, 144(sp)
-	ld		s4, 152(sp)
-	ld		s5, 160(sp)
-	ld		s6, 168(sp)
-	ld		s7, 176(sp)
-	ld		s8, 184(sp)
-	ld		s9, 192(sp)
-	ld		s10, 200(sp)
-	ld		s11, 208(sp)
-	ld		t3, 216(sp)
-	ld		t4, 224(sp)
-	ld		t5, 232(sp)
-	ld		t6, 240(sp)
-
-	addi	sp, sp, 256
+	ld		ra, 0(tp)
+	ld		sp, 8(tp)
+	ld		gp, 16(tp)
+	// sd		tp, 24(tp)
+	ld		t0, 32(tp)
+	ld		t1, 40(tp)
+	ld		t2, 48(tp)
+	ld		s0, 56(tp)
+	ld		s1, 64(tp)
+	ld		a0, 72(tp)
+	ld		a1, 80(tp)
+	ld		a2, 88(tp)
+	ld		a3, 96(tp)
+	ld		a4, 104(tp)
+	ld		a5, 112(tp)
+	ld		a6, 120(tp)
+	ld		a7, 128(tp)
+	ld		s3, 144(tp)
+	ld		s4, 152(tp)
+	ld		s5, 160(tp)
+	ld		s6, 168(tp)
+	ld		s7, 176(tp)
+	ld		s8, 184(tp)
+	ld		s9, 192(tp)
+	ld		s10, 200(tp)
+	ld		s11, 208(tp)
+	ld		t3, 216(tp)
+	ld		t4, 224(tp)
+	ld		t5, 232(tp)
+	ld		t6, 240(tp)
 
 	mret"#
 );
 
-fn init() {
+#[no_mangle]
+extern "C" fn init() {
     // Setup driver
     uart::Uart::start_driver(0x1000_0000);
     println!("Uart driver : \x1b[32m[DONE]\x1b[0m");
@@ -275,16 +326,19 @@ fn init() {
 
 #[no_mangle]
 extern "C" fn kmain() {
-    // Init os
-    init();
-
     let lock = lock::SpinLock::new();
     lock.lock();
     // Print on screen
     println!("\x1b[1m\x1b[32mWelcome on my rust risc-v operating system !!!\x1b[0m");
     lock.unlock();
 
-    loop {}
+    let mut i: usize = 0;
+    loop {
+        println!("Init process {}", i);
+        for _ in 0..500000 {}
+
+        i += 1;
+    }
 }
 
 pub mod kmalloc;

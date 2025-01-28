@@ -1,43 +1,57 @@
+use crate::kmain;
 use crate::process::{self, Process};
+use core::arch::asm;
 
 pub struct Scheduler {
+    pub init: process::Process,
     proc1: process::Process,
     proc2: process::Process,
     counter: u32,
 }
 
 pub static mut SCHEDULER: Scheduler = Scheduler {
+    init: Process::null_proc(),
     proc1: Process::null_proc(),
     proc2: Process::null_proc(),
     counter: 0,
 };
 
 pub fn init() {
-    unsafe { SCHEDULER = Scheduler::new_scheduler() }
+    unsafe {
+        SCHEDULER = Scheduler::new_scheduler();
+        Scheduler::propagate_decision(&raw const SCHEDULER.init as usize);
+    }
 }
 
 pub fn init_sanity_check() {}
 
 impl Scheduler {
     pub fn new_scheduler() -> Self {
-        let proc1 = process::Process::new_process(process::process1 as usize);
-        let proc2 = process::Process::new_process(process::process2 as usize);
-
-        let current_scheduler = Scheduler {
-            proc1: proc1,
-            proc2: proc2,
+        Scheduler {
+            init: process::Process::new_process(kmain as usize),
+            proc1: process::Process::new_process(process::process1 as usize),
+            proc2: process::Process::new_process(process::process2 as usize),
             counter: 0,
-        };
-
-        current_scheduler
+        }
     }
 
-    pub fn next(&mut self) -> usize {
+    pub unsafe fn next(&mut self) {
+        match self.counter % 3 {
+            0 => Self::propagate_decision(&raw const self.proc1 as usize),
+            1 => Self::propagate_decision(&raw const self.proc2 as usize),
+            2 => Self::propagate_decision(&raw const self.init as usize),
+            _ => panic!("Unreachable"),
+        }
+
         self.counter += 1;
-        if self.counter % 2 == 0 {
-            self.proc1.start_pc
-        } else {
-            self.proc2.start_pc
+    }
+
+    pub(crate) fn propagate_decision(value: usize) {
+        unsafe {
+            asm!(
+            "csrw mscratch, {0}",
+            in(reg) value
+            );
         }
     }
 }

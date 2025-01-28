@@ -146,15 +146,12 @@ extern "C" fn m_trap() -> usize {
             unsafe {
                 // TODO: Make sure it is optimal : https://five-embeddev.com/riscv-priv-isa-manual/Priv-v1.12/machine.html#machine-timer-registers-mtime-and-mtimecmp
                 let mtimecmp = 0x0200_4000 as *mut u64;
-                let time_second = 10_000_000;
+                let time_second = 100_000_00;
                 mtimecmp.write_volatile(mtimecmp.read_volatile() + 1 * time_second);
-            }
 
-            println!("\x1b[0;33mReceived a timer interrupt\x1b[0m");
+                println!("\x1b[0;33mReceived a timer interrupt, scheduling new process\x1b[0m");
 
-            unsafe {
-                // Get the next pc from scheduler
-                return_pc = SCHEDULER.next();
+                SCHEDULER.next();
             }
         }
         MCause::MachineExternalInt => {
