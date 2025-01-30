@@ -313,6 +313,10 @@ extern "C" fn init() {
     scheduler::init_sanity_check();
     println!("Scheduler : \x1b[32m[DONE]\x1b[0m");
 
+    virtio::init();
+    virtio::init_sanity_check();
+    println!("Virtio : \x1b[32m[DONE]\x1b[0m");
+
     // Install page table
     unsafe {
         let root_address = (paging::ROOT) as usize;
@@ -351,3 +355,4 @@ pub mod reg;
 pub mod scheduler;
 pub mod trap;
 pub mod uart;
+pub mod virtio;
