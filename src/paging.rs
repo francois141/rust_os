@@ -147,10 +147,8 @@ pub fn virtual_to_physical(virtual_address: usize) -> Option<usize> {
             current = current_entry.add(virtual_offsets[i + 1]).as_ref().unwrap()
         }
 
-        assert!(false, "This part should not be reachable");
+        unreachable!();
     }
-
-    None
 }
 
 pub const fn page_align_round_down(val: usize) -> usize {
