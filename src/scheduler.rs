@@ -28,9 +28,9 @@ pub fn init_sanity_check() {}
 impl Scheduler {
     pub fn new_scheduler() -> Self {
         Scheduler {
-            init: process::Process::new_process(kmain as usize),
-            proc1: process::Process::new_process(process::process1 as usize),
-            proc2: process::Process::new_process(process::process2 as usize),
+            init: Process::new_process(kmain as usize),
+            proc1: Process::new_process(process::process1 as usize),
+            proc2: Process::new_process(process::process2 as usize),
             counter: 0,
         }
     }
@@ -40,7 +40,7 @@ impl Scheduler {
             0 => Self::propagate_decision(&raw const self.proc1 as usize),
             1 => Self::propagate_decision(&raw const self.proc2 as usize),
             2 => Self::propagate_decision(&raw const self.init as usize),
-            _ => panic!("Unreachable"),
+            _ => unreachable!(),
         }
 
         self.counter += 1;

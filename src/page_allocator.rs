@@ -6,11 +6,11 @@ use crate::_heap_start;
 // TODO: Fix it dynamically
 const HEAP_SIZE: usize = 0x1000000;
 
-static EMPTY_PAGE: u8 = 0x0;
-static TAKEN_FLAG: u8 = 0x1;
-static LAST_FLAG: u8 = 0x2;
+const EMPTY_PAGE: u8 = 0x0;
+const TAKEN_FLAG: u8 = 0x1;
+const LAST_FLAG: u8 = 0x2;
 
-pub static PAGE_SIZE: usize = 4096;
+pub(crate) const PAGE_SIZE: usize = 4096;
 
 pub struct Page {
     flags: u8,
