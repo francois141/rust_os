@@ -5,7 +5,8 @@
     allocator_api,
     alloc_error_handler,
     raw_ref_op,
-    asm_const
+    asm_const,
+    const_refs_to_static
 )]
 
 use core::arch::asm;
@@ -313,9 +314,15 @@ extern "C" fn init() {
     scheduler::init_sanity_check();
     println!("Scheduler : \x1b[32m[DONE]\x1b[0m");
 
+    // Init virtio
     virtio::init();
     virtio::init_sanity_check();
     println!("Virtio : \x1b[32m[DONE]\x1b[0m");
+
+    // Init block device
+    block::init();
+    block::init_sanity_check();
+    println!("Block device : \x1b[32m[DONE]\x1b[0m");
 
     // Install page table
     unsafe {
@@ -345,6 +352,7 @@ extern "C" fn kmain() {
     }
 }
 
+mod block;
 pub mod kmalloc;
 pub mod lock;
 pub mod page_allocator;
