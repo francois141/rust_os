@@ -6,7 +6,7 @@ os_target       := "--target ./config/riscv-unknown-os.json"
 os_elf          := "target/riscv-unknown-os/debug/os"
 os_img          := "target/riscv-unknown-os/debug/os.img"
 
-entropy_device_qemu := " -device virtio-rng-device"
+entropy_device_qemu := "-device virtio-rng-device"
 block_device_qemu := "-drive if=none,format=raw,file=config/disk.img,id=foo -device virtio-blk-device,drive=foo"
 
 build:

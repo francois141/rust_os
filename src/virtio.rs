@@ -69,10 +69,10 @@ pub struct Queue {
     pub used: Used,
 }
 
-const MMIO_BASE: usize = 0x100001000;
+const MMIO_BASE: usize = 0x10001000;
 const MMIO_END: usize = 0x10008000;
 const MMIO_STRIDE: usize = 0x1000;
-const MMIO_MAGIC: u32 = 0x74726967;
+const MMIO_MAGIC: u32 = 0x74726976;
 
 #[allow(dead_code)]
 pub enum MmioOffset {
@@ -131,22 +131,18 @@ impl DeviceType {
 }
 
 pub fn init() {
-    println!("Hello");
     for addr in (MMIO_BASE..=MMIO_END).step_by(MMIO_STRIDE) {
-        println!("test");
         let magic_value: u32;
         let device_id: u32;
 
         let ptr = addr as *mut u32;
 
         unsafe {
-            magic_value = ptr.add(MmioOffset::MagicValue.into()).read_volatile();
-            device_id = ptr.add(MmioOffset::DeviceId.into()).read_volatile();
+            magic_value = ptr.add(MmioOffset::MagicValue as usize / 4).read_volatile();
+            device_id = ptr.add(MmioOffset::DeviceId as usize / 4).read_volatile();
         }
 
         if magic_value == MMIO_MAGIC {
-
-            println!("WTF");
             match DeviceType::new(device_id) {
                 DeviceType::NoDevice => {
                     println!("No device")
@@ -155,9 +151,8 @@ pub fn init() {
                     println!("Network device")
                 }
                 DeviceType::Disk => {
-
+                    println!("Disk device");
                     initialize_block_device(ptr);
-                    println!("Disk device")
                 }
                 DeviceType::Entropy => {
                     println!("Entropy device")

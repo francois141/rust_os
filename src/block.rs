@@ -60,7 +60,7 @@ pub fn initialize_block_device(pointer: *mut u32) -> bool {
 
         pointer
             .add(virtio::MmioOffset::DriverFeatures as usize / 4)
-            .write_volatile(VIRTIO_BLK_FEATURE_READ_ONLY);
+            .write_volatile(_device_features);
         // 5. Set the FEATURES_OK status bit. The driver MUST NOT accept new feature bits after this step.
         current_status_bit |= virtio::StatusField::FeaturesOk as u32;
         pointer
@@ -145,6 +145,9 @@ pub fn initialize_block_device(pointer: *mut u32) -> bool {
         pointer
             .add(virtio::MmioOffset::Status as usize / 4)
             .write_volatile(current_status_bit);
+
+
+        println!("Done with initialization of the disk device");
 
 
         // Now we can use the virtio block driver
