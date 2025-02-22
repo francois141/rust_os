@@ -131,46 +131,51 @@ _start:
 	la		t2, asm_trap_vector
 	csrw	mtvec, t2
 
-	# Jump now to the kernel process
-	csrr tp, mscratch
+    # Jump now to the kernel process
 
-	# Load program counter
-	ld a0, 264(tp)
+    # Switch t6 with mscratch
+    csrr	t6, mscratch
+
+    # Load program counter
+	ld a0, 264(t6)
 	csrw	mepc, a0
 
-	ld		ra, 0(tp)
-	ld		sp, 8(tp)
-	ld		gp, 16(tp)
-	// ld	    tp, 24(tp)
-	ld		t0, 32(tp)
-	ld		t1, 40(tp)
-	ld		t2, 48(tp)
-	ld		s0, 56(tp)
-	ld		s1, 64(tp)
-	ld		a0, 72(tp)
-	ld		a1, 80(tp)
-	ld		a2, 88(tp)
-	ld		a3, 96(tp)
-	ld		a4, 104(tp)
-	ld		a5, 112(tp)
-	ld		a6, 120(tp)
-	ld		a7, 128(tp)
-	ld		s3, 144(tp)
-	ld		s4, 152(tp)
-	ld		s5, 160(tp)
-	ld		s6, 168(tp)
-	ld		s7, 176(tp)
-	ld		s8, 184(tp)
-	ld		s9, 192(tp)
-	ld		s10, 200(tp)
-	ld		s11, 208(tp)
-	ld		t3, 216(tp)
-	ld		t4, 224(tp)
-	ld		t5, 232(tp)
-	ld		t6, 240(tp)
+	# save the registers.
+	ld		ra, 0(t6)
+	ld		sp, 8(t6)
+	ld		gp, 16(t6)
+	ld		tp, 24(t6)
+	ld		t0, 32(t6)
+	ld		t1, 40(t6)
+	ld		t2, 48(t6)
+	ld		s0, 56(t6)
+	ld		s1, 64(t6)
+	ld		a0, 72(t6)
+	ld		a1, 80(t6)
+	ld		a2, 88(t6)
+	ld		a3, 96(t6)
+	ld		a4, 104(t6)
+	ld		a5, 112(t6)
+	ld		a6, 120(t6)
+	ld		a7, 128(t6)
+	ld		s2, 136(t6)
+	ld		s3, 144(t6)
+	ld		s4, 152(t6)
+	ld		s5, 160(t6)
+	ld		s6, 168(t6)
+	ld		s7, 176(t6)
+	ld		s8, 184(t6)
+	ld		s9, 192(t6)
+	ld		s10, 200(t6)
+	ld		s11, 208(t6)
+	ld		t3, 216(t6)
+	ld		t4, 224(t6)
+	ld		t5, 232(t6)
+	ld		t6, 240(t6)
 
-	# mret allows us to jump to supervisor mode
+	# Jump back
 	mret
+
 _end:
 	wfi
 	j		_end
@@ -228,7 +233,6 @@ asm_trap_vector:
 	sd		t3, 216(t6)
 	sd		t4, 224(t6)
 	sd		t5, 232(t6)
-	sd		t6, 240(t6)
 
     # Store the current pc in the process structure
     csrr tp, mepc
@@ -243,42 +247,42 @@ asm_trap_vector:
 	call	m_trap
 
 	# Jump now to the kernel process
-	csrr tp, mscratch
+	csrr t6, mscratch
 
 	# Load program counter
-	ld a0, 264(tp)
+	ld a0, 264(t6)
 	csrw	mepc, a0
 
-	ld		ra, 0(tp)
-	ld		sp, 8(tp)
-	ld		gp, 16(tp)
-	// sd		tp, 24(tp)
-	ld		t0, 32(tp)
-	ld		t1, 40(tp)
-	ld		t2, 48(tp)
-	ld		s0, 56(tp)
-	ld		s1, 64(tp)
-	ld		a0, 72(tp)
-	ld		a1, 80(tp)
-	ld		a2, 88(tp)
-	ld		a3, 96(tp)
-	ld		a4, 104(tp)
-	ld		a5, 112(tp)
-	ld		a6, 120(tp)
-	ld		a7, 128(tp)
-	ld		s3, 144(tp)
-	ld		s4, 152(tp)
-	ld		s5, 160(tp)
-	ld		s6, 168(tp)
-	ld		s7, 176(tp)
-	ld		s8, 184(tp)
-	ld		s9, 192(tp)
-	ld		s10, 200(tp)
-	ld		s11, 208(tp)
-	ld		t3, 216(tp)
-	ld		t4, 224(tp)
-	ld		t5, 232(tp)
-	ld		t6, 240(tp)
+	ld		ra, 0(t6)
+	ld		sp, 8(t6)
+	ld		gp, 16(t6)
+	ld		tp, 24(t6)
+	ld		t0, 32(t6)
+	ld		t1, 40(t6)
+	ld		t2, 48(t6)
+	ld		s0, 56(t6)
+	ld		s1, 64(t6)
+	ld		a0, 72(t6)
+	ld		a1, 80(t6)
+	ld		a2, 88(t6)
+	ld		a3, 96(t6)
+	ld		a4, 104(t6)
+	ld		a5, 112(t6)
+	ld		a6, 120(t6)
+	ld		a7, 128(t6)
+	ld		s3, 144(t6)
+	ld		s4, 152(t6)
+	ld		s5, 160(t6)
+	ld		s6, 168(t6)
+	ld		s7, 176(t6)
+	ld		s8, 184(t6)
+	ld		s9, 192(t6)
+	ld		s10, 200(t6)
+	ld		s11, 208(t6)
+	ld		t3, 216(t6)
+	ld		t4, 224(t6)
+	ld		t5, 232(t6)
+	ld		t6, 240(t6)
 
 	mret"#
 );
